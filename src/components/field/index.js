@@ -23,10 +23,10 @@ function startAnimation(animation, options, callback) {
 }
 
 function labelStateFromProps(props, state) {
-  let { placeholder, defaultValue } = props
-  let { text, receivedFocus } = state
+  let { placeholder, defaultValue, value } = props
+  let { receivedFocus } = state
 
-  return !!(placeholder || text || (!receivedFocus && defaultValue))
+  return !!(placeholder || value || (!receivedFocus && defaultValue))
 }
 
 function errorStateFromProps(props, state) {
@@ -164,13 +164,12 @@ export default class TextField extends PureComponent {
     this.mounted = false
     this.focused = false
 
-    let { value: text, error, fontSize } = this.props
+    let { value, error, fontSize } = this.props
 
-    let labelState = labelStateFromProps(this.props, { text }) ? 1 : 0
+    let labelState = labelStateFromProps(this.props, { value }) ? 1 : 0
     let focusState = errorStateFromProps(this.props) ? -1 : 0
 
     this.state = {
-      text,
       error,
 
       focusAnimation: new Animated.Value(focusState),
@@ -288,20 +287,15 @@ export default class TextField extends PureComponent {
   }
 
   value() {
-    let { text } = this.state
     let { defaultValue } = this.props
 
-    let value = this.isDefaultVisible() ? defaultValue : text
+    let value = this.isDefaultVisible() ? defaultValue : this.props.value
 
-    if (null == value) {
+    if (null === value) {
       return ''
     }
 
     return 'string' === typeof value ? value : String(value)
-  }
-
-  setValue(text) {
-    this.setState({ text })
   }
 
   isFocused() {
@@ -322,10 +316,10 @@ export default class TextField extends PureComponent {
   }
 
   isDefaultVisible() {
-    let { text, receivedFocus } = this.state
-    let { defaultValue } = this.props
+    let { receivedFocus } = this.state
+    let { defaultValue, value } = this.props
 
-    return !receivedFocus && null == text && null != defaultValue
+    return !receivedFocus && null === value && null !== defaultValue
   }
 
   isPlaceholderVisible() {
@@ -356,7 +350,7 @@ export default class TextField extends PureComponent {
     this.startLabelAnimation()
 
     if (!receivedFocus) {
-      this.setState({ receivedFocus: true, text: this.value() })
+      this.setState({ receivedFocus: true })
     }
   }
 
@@ -383,15 +377,13 @@ export default class TextField extends PureComponent {
 
   onChangeText(text) {
     let { onChangeText, formatText } = this.props
-
+    let formattedText = text
     if ('function' === typeof formatText) {
-      text = formatText(text)
+      formattedText = formatText(text)
     }
 
-    this.setState({ text })
-
     if ('function' === typeof onChangeText) {
-      onChangeText(text)
+      onChangeText(formattedText)
     }
   }
 
@@ -523,7 +515,7 @@ export default class TextField extends PureComponent {
       affixTextStyle: style,
     } = this.props
 
-    if (null == affix) {
+    if (null === affix) {
       return null
     }
 
