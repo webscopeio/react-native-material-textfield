@@ -291,11 +291,11 @@ export default class TextField extends PureComponent {
 
     let value = this.isDefaultVisible() ? defaultValue : this.props.value
 
-    if (null === value) {
+    if (typeof value !== 'string') {
       return ''
     }
 
-    return 'string' === typeof value ? value : String(value)
+    return value
   }
 
   isFocused() {
